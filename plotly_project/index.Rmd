@@ -1,0 +1,66 @@
+---
+title       : Plotly
+subtitle    : Coursera Course Project - 19 August 2017
+author      : Jason Schmidt
+job         : 
+framework   : io2012       # {io2012, html5slides, shower, dzslides, ...}
+highlighter : highlight.js  # {highlight.js, prettify, highlight}
+hitheme     : tomorrow      # 
+widgets     : [w]            # {mathjax, quiz, bootstrap}
+mode        : selfcontained # {standalone, draft}
+knit        : slidify::knit2slides
+---
+
+
+```{r load, echo=FALSE, include=FALSE}
+library(plotly)
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(webshot)
+library(scales)
+```
+
+```{r prep, echo=FALSE, include=FALSE}
+mf<-read.csv("~/coursera/data scientist/Data products/mf.csv")
+
+mf<-mf[!is.na(mf$sqftlotsize) & !is.na(mf$regionidcity),]
+mf<-mf %>%
+        mutate(regionidcity=as.factor(regionidcity)) %>%
+        add_count(X) %>%
+        group_by(regionidcity) %>%
+        summarise(
+                avgValue=mean(taxablevaluetotal),
+                numProps=sum(n),
+                valPerSqft=mean(taxablevaluetotal/sqftlotsize)
+        )
+```
+
+## Plotly plot
+
+```{r plot, echo=FALSE}
+
+p<-ggplot(data=mf) +
+        geom_point(aes(x=regionidcity,y=valPerSqft,color=numProps)) +
+        scale_y_continuous(labels=comma) +
+        labs(x="Region City ID") +
+        labs(y="Average value per Sq ft") +
+        labs(title="Orange County California Cities, 2016") +
+        theme(axis.text.x = element_text(angle = 90, hjust = 1),axis.title.x = element_text(vjust=-1),plot.margin = unit(c(1, 1, 1, 1), "cm")) 
+
+g<-ggplotly(p)
+
+htmlwidgets::saveWidget(as_widget(g), "wp.html")
+``` 
+
+```{r wp, echo=FALSE, warning=FALSE, cache=FALSE, results='asis'}
+cat('<iframe src="./wp.html" width=100% height=10% allowtransparency="true"> </iframe>')
+```
+
+--- .class #id 
+
+## That's all folks!
+
+
+
+
